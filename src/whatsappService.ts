@@ -2,6 +2,7 @@ import * as admin from "firebase-admin";
 import axios from "axios";
 import express from "express";
 import cors from "cors";
+import 'dotenv/config';
 
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) {
@@ -15,12 +16,13 @@ app.use(cors());
 app.use(express.json());
 
 // Use environment variables for secrets
-const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_TOKEN;
+const WHATSAPP_ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
 const WHATSAPP_PHONE_ID = process.env.WHATSAPP_PHONE_ID;
 
 /**
  * Send WhatsApp notification using template or custom message
  */
+console.log("PHONE_ID:", WHATSAPP_PHONE_ID, "TOKEN:", WHATSAPP_ACCESS_TOKEN?.slice(0, 8));
 export async function sendWhatsAppNotification(phoneNumber: string, type: string, params: any) {
   try {
     const cleanNumber = phoneNumber.replace(/[+\s]/g, "");
@@ -34,7 +36,7 @@ export async function sendWhatsAppNotification(phoneNumber: string, type: string
         type: "template",
         template: {
           name: templateName,
-          language: { code: "en_US" },
+          language: { code: "en_US" }, // <-- use the correct code here
           components: [
             {
               type: "body",
@@ -67,7 +69,7 @@ function getTemplateConfig(type: string, params: any) {
 
   switch (type) {
     case "task_assigned":
-      templateName = "task_alert";
+      templateName = "auto_pay_reminder_3";
       parameters = [
         params.taskTitle,
         params.projectName,
@@ -76,7 +78,7 @@ function getTemplateConfig(type: string, params: any) {
       ];
       break;
     case "project_created":
-      templateName = "company_added";
+      templateName = "auto_project_created";
       parameters = [
         params.projectName,
         params.startDate,
@@ -85,7 +87,7 @@ function getTemplateConfig(type: string, params: any) {
       ];
       break;
     case "added_to_project":
-      templateName = "project_addede";
+      templateName = "auto_added_to_project";
       parameters = [
         params.userName,
         params.projectName,
@@ -94,16 +96,15 @@ function getTemplateConfig(type: string, params: any) {
       ];
       break;
     case "new_employee":
-      templateName = "new_user";
+      templateName = "auto_new_employee";
       parameters = [
         params.employeeName,
         params.companyName,
-        params.tempPassword || "Set by admin",
         params.appUrl,
       ];
       break;
     case "task_comment":
-      templateName = "task_comment";
+      templateName = "auto_task_comment";
       parameters = [
         params.userName,
         params.taskTitle,
@@ -112,7 +113,7 @@ function getTemplateConfig(type: string, params: any) {
       ];
       break;
     case "task_status_update":
-      templateName = "task_status_update";
+      templateName = "auto_task_update_status";
       parameters = [
         params.taskTitle,
         params.oldStatus || "Previous status",
@@ -121,7 +122,7 @@ function getTemplateConfig(type: string, params: any) {
       ];
       break;
     case "project_status_update":
-      templateName = "project_status_update";
+      templateName = "auto_project_status_update";
       parameters = [
         params.projectName,
         params.oldStatus || "Previous status",
