@@ -12,7 +12,7 @@ if (!admin.apps.length) {
 }
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 // Use environment variables for secrets

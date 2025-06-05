@@ -14,7 +14,11 @@ if (!admin.apps.length) {
 }
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "*", // or use "*" for all origins (not recommended for production)
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 app.use(express.json());
 
 app.post("/api/notifications/whatsapp", async (req, res) => {
