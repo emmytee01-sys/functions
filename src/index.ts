@@ -6,7 +6,10 @@ import { sendWhatsAppNotification } from "./whatsappService";
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
-  admin.initializeApp();
+  admin.initializeApp({
+    credential: admin.credential.applicationDefault(),
+    projectId: process.env.GCLOUD_PROJECT, // Optional, if needed
+  });
 }
 
 const app = express();
