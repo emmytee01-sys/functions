@@ -1,4 +1,4 @@
-import app from "./whatsappService";
+import app from "./index.js"; // or "./dist/index.js" if built
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
