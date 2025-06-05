@@ -3,6 +3,7 @@ import cors from "cors";
 import 'dotenv/config';
 import admin from "firebase-admin";
 import { sendWhatsAppNotification } from "./whatsappService";
+import { getUserById } from "./userService"; // <-- Import the service
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -16,21 +17,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Replace this with your real DB lookup
-async function getPhoneNumberForUser(userId: string): Promise<string | null> {
-  try {
-    const userDoc = await admin.firestore().collection("users").doc(userId).get();
-    if (userDoc.exists) {
-      const data = userDoc.data();
-      return data?.whatsappNumber || null;
-    }
-    return null;
-  } catch (err) {
-    console.error("Error fetching user:", err);
-    return null;
-  }
-}
-
 app.post("/api/notifications/whatsapp", async (req, res) => {
   try {
     const { userIds, type, params } = req.body;
@@ -40,9 +26,11 @@ app.post("/api/notifications/whatsapp", async (req, res) => {
 
     const results = [];
     for (const userId of userIds) {
-      const phoneNumber = await getPhoneNumberForUser(userId);
+      const user = await getUserById(userId);
+      const phoneNumber = user?.whatsappNumber;
       if (!phoneNumber) {
         console.warn(`No WhatsApp number found for userId: ${userId}`);
+        results.push({ userId, status: "error", error: "No WhatsApp number found" });
         continue;
       }
       try {
